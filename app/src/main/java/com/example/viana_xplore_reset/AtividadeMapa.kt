@@ -10,6 +10,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.AdapterView
+import android.widget.Toast
 import com.example.viana_xplore_reset.Webservices.Output_Marcador
 import com.example.viana_xplore_reset.Webservices.PostLogin
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -29,7 +30,12 @@ import retrofit2.Response
 class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var mMap: GoogleMap
-    private var LOCATION_PERMISSION_REQUEST_CODE = 1
+
+
+    //private var LOCATION_PERMISSION_REQUEST_CODE = 1
+    /*lateinit var nome: String
+    lateinit var descricao: String
+    lateinit var foto: String*/
     lateinit var longitude: String
     lateinit var latitude: String
 
@@ -56,14 +62,14 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
                     val c = response.body()!!
                     for (marcador in c) {
                         position = LatLng(marcador.latitude.toDouble(), marcador.longitude.toDouble())
-                        val marcador = mMap.addMarker(MarkerOptions().position(position).title("${marcador.descricao}"))
+                        val marcador = mMap.addMarker(MarkerOptions().position(position).title("${marcador.nome}"))
                         marcador.tag = marcador.id
                     }
                 }
             }
 
             override fun onFailure(call: Call<List<Output_Marcador>>, t: Throwable) {
-
+                Toast.makeText(this@AtividadeMapa, "${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -88,6 +94,10 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
 
                     var id = p0.tag.toString().toInt()
                     intent.putExtra(Marcadores.EXTRA_ID, id)
+                    /*intent.putExtra(Marcadores.EXTRA_NOME, nome)
+                    intent.putExtra(Marcadores.EXTRA_DESCRICAO, descricao)
+                    intent.putExtra(Marcadores.EXTRA_FOTO, foto)*/
+
 
                     startActivity(intent)
                 }
