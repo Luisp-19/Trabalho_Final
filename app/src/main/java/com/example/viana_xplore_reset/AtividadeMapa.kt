@@ -11,7 +11,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.AdapterView
 import android.widget.Toast
-import com.example.viana_xplore_reset.Webservices.Output_Marcador
+import com.example.viana_xplore_reset.Webservices.Markador
 import com.example.viana_xplore_reset.Webservices.PostLogin
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -33,15 +33,18 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
 
 
     //private var LOCATION_PERMISSION_REQUEST_CODE = 1
-    /*lateinit var nome: String
+    lateinit var nome: String
     lateinit var descricao: String
-    lateinit var foto: String*/
+    lateinit var foto: String
     lateinit var longitude: String
     lateinit var latitude: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         longitude = ""
         latitude = ""
+        nome = ""
+        descricao = ""
+        foto = ""
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         super.onCreate(savedInstanceState)
@@ -56,19 +59,19 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
         val call = request.getMarcadores()              //pede a API os problemas da BD
         var position: LatLng
 
-        call.enqueue(object : Callback<List<Output_Marcador>> {
-            override fun onResponse(call: Call<List<Output_Marcador>>, response: Response<List<Output_Marcador>>) {
+        call.enqueue(object : Callback<List<Markador>> {
+            override fun onResponse(call: Call<List<Markador>>, response: Response<List<Markador>>) {
                 if (response.isSuccessful) {
                     val c = response.body()!!
-                    for (marcador in c) {
-                        position = LatLng(marcador.latitude.toDouble(), marcador.longitude.toDouble())
-                        val marcador = mMap.addMarker(MarkerOptions().position(position).title("${marcador.nome}"))
-                        marcador.tag = marcador.id
+                    for (marcadorFor in c) {
+                        position = LatLng(marcadorFor.latitude.toDouble(), marcadorFor.longitude.toDouble())
+                        val marcador = mMap.addMarker(MarkerOptions().position(position).title("${marcadorFor.nome}"))
+                        marcador.tag = marcadorFor.id
                     }
                 }
             }
 
-            override fun onFailure(call: Call<List<Output_Marcador>>, t: Throwable) {
+            override fun onFailure(call: Call<List<Markador>>, t: Throwable) {
                 Toast.makeText(this@AtividadeMapa, "${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
@@ -88,18 +91,19 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
         override fun onMapReady(googleMap: GoogleMap) {
             mMap = googleMap
 
-            mMap.setOnInfoWindowClickListener(object : GoogleMap.OnInfoWindowClickListener {
-                override fun onInfoWindowClick(p0: Marker) {
+            mMap.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener {
+                override fun onMarkerClick(p0: Marker): Boolean {
                     val intent = Intent(this@AtividadeMapa, Marcadores::class.java)
 
-                    var id = p0.tag.toString().toInt()
-                    intent.putExtra(Marcadores.EXTRA_ID, id)
-                    /*intent.putExtra(Marcadores.EXTRA_NOME, nome)
+                    //var id = p0.tag.toString().toInt()
+                    //intent.putExtra(Marcadores.EXTRA_ID, id)
+                    intent.putExtra(Marcadores.EXTRA_ID, p0.tag.toString())
+                    intent.putExtra(Marcadores.EXTRA_NOME, nome)
                     intent.putExtra(Marcadores.EXTRA_DESCRICAO, descricao)
-                    intent.putExtra(Marcadores.EXTRA_FOTO, foto)*/
-
+                    intent.putExtra(Marcadores.EXTRA_FOTO, foto)
 
                     startActivity(intent)
+                    return false
                 }
             })
         }

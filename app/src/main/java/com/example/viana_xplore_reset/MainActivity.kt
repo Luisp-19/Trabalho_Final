@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
 
     //Opção para criar utilizador caso não haja
     fun criar_utilizador(view: View) {
-        //recebe os valores dos campos de texto
+        //Recebe os valores dos campos de texto
         val utilizador = utilizadorEditTextView.text.toString()
         val palavrapasse = palavrapasseEditTextView.text.toString().sha256()
 
@@ -111,6 +111,7 @@ class MainActivity : AppCompatActivity() {
                 utilizador,
                 palavrapasse
         )
+
         call.enqueue(object : Callback<Output_Login> {
             override fun onResponse(call: Call<Output_Login>, response: Response<Output_Login>){
                 if (response.isSuccessful) {

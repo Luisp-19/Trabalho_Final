@@ -1,6 +1,8 @@
 package com.example.viana_xplore_reset.Webservices
 
-//import com.example.viana_xplore_reset.Output_Marcador
+import com.example.viana_xplore_reset.Webservices.Markador
+import com.example.viana_xplore_reset.Webservices.Output_Login
+import com.example.viana_xplore_reset.Marcadores
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -15,9 +17,9 @@ interface PostLogin {
     fun postcriar(@Field("utilizador") utilizador: String, @Field("palavrapasse") palavrapasse: String): Call<Output_Login>
 
     @GET("/myslim/api/marcadores")
-    fun getMarcadores(): Call<List<Output_Marcador>>
+    fun getMarcadores(): Call<List<Markador>>
 
     @GET("/myslim/api/select/{id}")
-    fun getMarcadoresID(@Path("id") id: Int): Call<List<Output_Marcador>>
+    fun getMarcadoresID(@Path("id") id: Int): Call<List<Markador>>
 
 }

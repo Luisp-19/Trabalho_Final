@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Viana_Xplore_reset</string>
+    <string name="app_name">Viana Xplore</string>
 
     <string name="preference_file_key" translatable="false">preference_file_key</string>
     <string name="passwordlabel" translatable="false">Palavra-passe</string>
@@ -7,21 +7,14 @@
 
     <string name="logoutlabel" translatable="false">Logout</string>
     <string name="loginlabel" translatable="false">Login</string>
-    <string name="shownoteslabel">APP NOTAS</string>
     <string name="campo_utilizador_vazio">Campo utilizador vazio</string>
     <string name="campo_password_vazio">Campo password vazio</string>
     <string name="login_correto">Login com sucesso</string>
     <string name="login_incorreto">Login falhou</string>
-    <string name="empty_not_saved1">Edição vazia, não gravado</string>
-    <string name="title_activity_atividade_mapa">Mapa Reports</string>
-    <string name="marcador_inserido">Marcador inserido</string>
-    <string name="marcador_nao_inserido">marcador nao inserido</string>
-    <string name="botao_guardar">Guardar</string>
-    <string name="texto_marcador">Descrição</string>
+    <string name="title_activity_atividade_mapa">Viana Xplore</string>
     <string name="createuserlabel">Criar utilizador</string>
     <string name="automatic_login_check" translatable="false">automatic_login_check</string>
     <string name="automatic_login_username" translatable="false">automatic_login_username</string>
-    <string name="botao_apagar">APAGAR</string>
     <string name="criacao_falhou">Utilizador não criado</string>
     <string name="criacao_sucesso">Criação com sucesso</string>
 </resources>
