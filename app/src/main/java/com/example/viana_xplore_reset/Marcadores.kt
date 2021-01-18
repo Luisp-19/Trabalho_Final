@@ -77,6 +77,7 @@ class Marcadores : AppCompatActivity() {
                 }
         })
     }
+
     companion object {
         const val EXTRA_ID = "com.example.android.wordlistsql.EXTRA_ID"
         const val EXTRA_NOME = "com.example.android.wordlistsql.EXTRA_NOME"
