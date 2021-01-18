@@ -55,7 +55,7 @@ class Marcadores : AppCompatActivity() {
                         //val intent = Intent(this@Marcadores, AtividadeMarcador::class.java)
                         nome = findViewById(R.id.nomeView)
                         descricao = findViewById(R.id.descricaoView)
-                        //foto = findViewById(R.id.fotoView)
+                        foto = findViewById(R.id.fotoView)
                         nome.text = marcadorFor.nome
                         descricao.text = marcadorFor.descricao
                         //coordenadas.text = "${marcador.latitude}, ${marcador.longitude}"
