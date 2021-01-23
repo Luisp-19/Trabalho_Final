@@ -1,112 +1,65 @@
-/*package com.example.viana_xplore_reset
+package com.example.viana_xplore_reset
 
-
-import android.app.PendingIntent
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
+import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.gms.common.api.Status
-import com.google.android.gms.location.Geofence
-import com.google.android.gms.location.GeofencingRequest
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.model.Circle
+import com.example.viana_xplore_reset.Webservices.Fenke
+import com.example.viana_xplore_reset.Webservices.PostLogin
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
+class Fences : AppCompatActivity() {
+    private lateinit var mMap: GoogleMap
 
-class Fences : AppCompatActivity(){
+    /*override*/ fun onCreate() {
 
-    lateinit var latitude: TextView
-    lateinit var longitude: TextView
-    var fenceLatitude = 41.47480742234974
-    var fenceLongitude = -8.433650855729988
-    var raio = 1000.0f        //metros
-    var fenceID = 1
-    private val geoFencePendingIntent: PendingIntent? = null
+        val intent = intent
+        val request = Servicos.buildServico(PostLogin::class.java)
+        var positionFence: LatLng
+        var radiusFence: Int
+        /*var call_id_fence = id?.toInt()
+        val call = request.getFencesID(call_id_fence!!)
 
-    var geofence = Geofence.Builder()
-            .setRequestId(fenceID.toString()) // Geofence ID
-            .setCircularRegion(fenceLatitude, fenceLongitude, raio) // defining fence region
-            .setExpirationDuration(Geofence.NEVER_EXPIRE) // expiring date
-            // Transition types that it should look for
-            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
-            .build()
+        call.enqueue(object : Callback<List<Fenke>> {
+            override fun onResponse(call: Call<List<Fenke>>, response: Response<List<Fenke>>) {
+                if (response.isSuccessful) {
+                    val c = response.body()!!
+                    for (FencesFor in c) {
+                        positionFence = LatLng(FencesFor.latitude.toDouble(), FencesFor.longitude.toDouble())
+                        radiusFence = FencesFor.raio
+                        val fence = mMap.addMarker(MarkerOptions().position(positionFence).title("${FencesFor.zona}"))
+                        fence.tag = FencesFor.id
 
-    var request = GeofencingRequest.Builder() // Notification to trigger when the Geofence is created
-            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-            .addGeofence(geofence) // add a Geofence
-            .build()
+                        val circleOptions = CircleOptions()
+                        circleOptions.center(positionFence)
+                        circleOptions.radius(radiusFence.toDouble())
+                        circleOptions.strokeColor(Color.argb(255, 255, 0, 0))
+                        circleOptions.fillColor(Color.argb(64, 255, 0, 0))
+                        circleOptions.strokeWidth(5F)
+                        mMap.addCircle(circleOptions)
+                    }
+                }
+            }
 
-
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+            override fun onFailure(call: Call<List<Fenke>>, t: Throwable) {
+                Toast.makeText(this@Fences, "${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })*/
 
     }
 
-    private fun createGeofence(latLng: LatLng, radius: Float): Geofence? {
-        //Log.d(TAG, "createGeofence")
-        return Geofence.Builder()
-                .setRequestId(fenceID.toString())
-                .setCircularRegion(fenceLatitude, fenceLongitude, raio)
-                .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER
-                        or Geofence.GEOFENCE_TRANSITION_EXIT)
-                .build()
+    companion object {
+        const val EXTRA_ID_FENCE = "com.example.android.wordlistsql.EXTRA_ID_FENCE"
+        const val EXTRA_ZONA = "com.example.android.wordlistsql.EXTRA_ZONA"
+        const val EXTRA_LATITUDE_FENCE = "com.example.android.wordlistsql.EXTRA_LATITUDE_FENCE"
+        const val EXTRA_LONGITUDE_FENCE = "com.example.android.wordlistsql.EXTRA_LONGITUDE_FENCE"
     }
-
-    // Create a Geofence Request
-    private fun createGeofenceRequest(geofence: Geofence): GeofencingRequest? {
-       // Log.d(TAG, "createGeofenceRequest")
-        return GeofencingRequest.Builder()
-                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-                .addGeofence(geofence)
-                .build()
-    }
-
-
-    private fun createGeofencePendingIntent(): PendingIntent? {
-        //Log.d(TAG, "createGeofencePendingIntent")
-        if (geoFencePendingIntent != null) return geoFencePendingIntent
-        val intent = Intent(this, GeofenceTrasitionService::class.java)
-        return PendingIntent.getService(
-                this, fenceID, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-    }
-
-    // Add the created GeofenceRequest to the device's monitoring list
-    private fun addGeofence(request: GeofencingRequest) {
-        //Log.d(TAG, "addGeofence")
-        if (checkPermission()) LocationServices.GeofencingApi.addGeofences(
-                googleApiClient,
-                request,
-                createGeofencePendingIntent()
-        ).setResultCallback(this)
-    }
-
-    fun onResult(status: Status) {
-        //Log.i(TAG, "onResult: $status")
-        if (status.isSuccess()) {
-            drawGeofence()
-        } else {
-            // inform about fail
-        }
-    }
-
-    // Draw Geofence circle on GoogleMap
-    private var geoFenceLimits: Circle? = null
-    private fun drawGeofence() {
-        //Log.d(TAG, "drawGeofence()")
-        if (geoFenceLimits != null) geoFenceLimits!!.remove()
-        val circleOptions = CircleOptions()
-                .center(geoFenceMarker.getPosition())
-                .strokeColor(Color.argb(50, 70, 70, 70))
-                .fillColor(Color.argb(100, 150, 150, 150))
-                .radius(raio.toDouble())
-        geoFenceLimits = map.addCircle(circleOptions)
-    }
-
-
-}/*
+}

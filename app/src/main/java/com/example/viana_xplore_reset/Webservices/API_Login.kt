@@ -1,8 +1,5 @@
 package com.example.viana_xplore_reset.Webservices
 
-import com.example.viana_xplore_reset.Webservices.Markador
-import com.example.viana_xplore_reset.Webservices.Output_Login
-import com.example.viana_xplore_reset.Marcadores
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -21,5 +18,11 @@ interface PostLogin {
 
     @GET("/myslim/api/select/{id}")
     fun getMarcadoresID(@Path("id") id: Int): Call<List<Markador>>
+
+    @GET("/myslim/api/fences")
+    fun getFences(): Call<List<Fenke>>
+
+    @GET("/myslim/api/selectfence/{id}")
+    fun getFencesID(@Path("id") id: Int): Call<List<Fenke>>
 
 }

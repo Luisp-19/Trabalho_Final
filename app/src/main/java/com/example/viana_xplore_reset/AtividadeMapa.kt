@@ -1,25 +1,31 @@
 package com.example.viana_xplore_reset
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatActivity
+import android.content.pm.PackageManager
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.AdapterView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.example.viana_xplore_reset.Webservices.Markador
 import com.example.viana_xplore_reset.Webservices.PostLogin
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.LocationServices
-
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
@@ -27,7 +33,8 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
+
+class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var mMap: GoogleMap
 
@@ -39,14 +46,22 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
     lateinit var longitude: String
     lateinit var latitude: String
 
+    //Geofence
+    private lateinit var GeofencingClient: GeofencingClient
+    private var FINE_LOCATION_ACCESS_REQUEST_CODE = 10001;
+    private var  BACKGROUND_LOCATION_ACCESS_REQUEST_CODE = 10002;
+    private val GEOFENCE_RADIUS = 200f
+
     override fun onCreate(savedInstanceState: Bundle?) {
         longitude = ""
         latitude = ""
         nome = ""
         descricao = ""
         foto = ""
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        GeofencingClient = LocationServices.getGeofencingClient(this)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_atividade_mapa)
 
@@ -77,7 +92,6 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
         })
     }
 
-
         /**
          * Manipulates the map once available.
          * This callback is triggered when the map is ready to be used.
@@ -95,9 +109,8 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
                 override fun onMarkerClick(p0: Marker): Boolean {
                     val intent = Intent(this@AtividadeMapa, Marcadores::class.java)
 
-                    //var id = p0.tag.toString().toInt()
-                    //intent.putExtra(Marcadores.EXTRA_ID, id)
-                    intent.putExtra(Marcadores.EXTRA_ID, p0.tag.toString())
+                    var id = p0.tag.toString()
+                    intent.putExtra(Marcadores.EXTRA_ID, id)
                     intent.putExtra(Marcadores.EXTRA_NOME, nome)
                     intent.putExtra(Marcadores.EXTRA_DESCRICAO, descricao)
                     intent.putExtra(Marcadores.EXTRA_FOTO, foto)
@@ -106,7 +119,91 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
                     return false
                 }
             })
+
+            val viana = LatLng(41.7065, -8.8158)
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(viana, 16f))
+
+            enableUserLocation()
+
+            mMap.setOnMapLongClickListener(this)
+
         }
+
+    override fun onMapLongClick(latLng: LatLng) {
+        if (Build.VERSION.SDK_INT >= 29) {
+            //We need background permission
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                handleMapLongClick(latLng)
+            } else {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+                    //We show a dialog and ask for permission
+                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), BACKGROUND_LOCATION_ACCESS_REQUEST_CODE)
+                } else {
+                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), BACKGROUND_LOCATION_ACCESS_REQUEST_CODE)
+                }
+            }
+        } else {
+            handleMapLongClick(latLng)
+        }
+    }
+
+    private fun handleMapLongClick(latLng: LatLng) {
+        mMap.clear()
+        addMarker(latLng)
+        addCircle(latLng, GEOFENCE_RADIUS)
+        //addGeofence(latLng, GEOFENCE_RADIUS)
+    }
+
+    private fun addMarker(latLng: LatLng) {
+        val markerOptions = MarkerOptions().position(latLng)
+        mMap.addMarker(markerOptions)
+    }
+
+
+    private fun addCircle(latLng: LatLng, radius: Float) {
+        val circleOptions = CircleOptions()
+        circleOptions.center(latLng)
+        circleOptions.radius(1000.0)
+        circleOptions.strokeColor(Color.argb(255, 255, 0, 0))
+        circleOptions.fillColor(Color.argb(64, 255, 0, 0))
+        circleOptions.strokeWidth(4f)
+        mMap.addCircle(circleOptions)
+    }
+
+    private fun enableUserLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.isMyLocationEnabled = true
+        } else {
+            //Ask for permission
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                //We need to show user a dialog for displaying why the permission is needed and then ask for the permission...
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), FINE_LOCATION_ACCESS_REQUEST_CODE)
+            } else {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), FINE_LOCATION_ACCESS_REQUEST_CODE)
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (requestCode == FINE_LOCATION_ACCESS_REQUEST_CODE) {
+            if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //We have the permission
+                mMap.isMyLocationEnabled = true
+            } else {
+                //We do not have the permission..
+            }
+        }
+        if (requestCode == BACKGROUND_LOCATION_ACCESS_REQUEST_CODE) {
+            if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //We have the permission
+                Toast.makeText(this, "You can add geofences...", Toast.LENGTH_SHORT).show()
+            } else {
+                //We do not have the permission..
+                Toast.makeText(this, "Background location access is neccessary for geofences to trigger...", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     //Cria/Chama o menu no mapa
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -136,4 +233,5 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
             else -> super.onOptionsItemSelected(item)
         }
     }
+
 }

@@ -52,7 +52,6 @@ class Marcadores : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val c = response.body()!!
                     for (marcadorFor in c) {
-                        //val intent = Intent(this@Marcadores, AtividadeMarcador::class.java)
                         nome = findViewById(R.id.nomeView)
                         descricao = findViewById(R.id.descricaoView)
                         foto = findViewById(R.id.fotoView)
