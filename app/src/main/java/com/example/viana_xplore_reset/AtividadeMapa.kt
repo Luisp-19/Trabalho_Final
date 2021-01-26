@@ -2,6 +2,7 @@ package com.example.viana_xplore_reset
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -52,6 +53,15 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLo
     private var FINE_LOCATION_ACCESS_REQUEST_CODE = 10001;
     private var  BACKGROUND_LOCATION_ACCESS_REQUEST_CODE = 10002;
     private val GEOFENCE_RADIUS = 200f
+
+    private val geofencePendingIntent: PendingIntent by lazy {
+        val intent = Intent(this, FenceReceiver::class.java)
+        intent.action = ACTION_GEOFENCE_EVENT
+        // Use FLAG_UPDATE_CURRENT so that you get the same pending intent back when calling
+        // addGeofences() and removeGeofences().
+        PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         longitude = ""
@@ -254,6 +264,11 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLo
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    companion object {
+        internal const val ACTION_GEOFENCE_EVENT =
+                "com.example.android.wordlistsql.ACTION_GEOFENCE_EVENT"
     }
 
 }

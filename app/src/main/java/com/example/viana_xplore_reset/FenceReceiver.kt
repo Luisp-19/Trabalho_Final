@@ -5,13 +5,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import android.widget.Toast
 import androidx.core.content.ContextCompat
+import com.example.viana_xplore_reset.AtividadeMapa.Companion.ACTION_GEOFENCE_EVENT
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
 
 
-/*class FenceReceiver : BroadcastReceiver() {
+class FenceReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == ACTION_GEOFENCE_EVENT) {
@@ -36,15 +36,6 @@ import com.google.android.gms.location.GeofencingEvent
                 }
                 // Check geofence against the constants listed in GeofenceUtil.kt to see if the
                 // user has entered any of the locations we track for geofences.
-                val foundIndex = GeofencingConstants.LANDMARK_DATA.indexOfFirst {
-                    it.id == fenceId
-                }
-
-                // Unknown Geofences aren't helpful to us
-                if ( -1 == foundIndex ) {
-                    Log.e(TAG, "Unknown Geofence: Abort Mission")
-                    return
-                }
 
                 val notificationManager = ContextCompat.getSystemService(
                         context,
@@ -52,11 +43,11 @@ import com.google.android.gms.location.GeofencingEvent
                 ) as NotificationManager
 
                 notificationManager.sendGeofenceEnteredNotification(
-                        context, foundIndex
+                        context
                 )
             }
         }
     }
 }
 
-private const val TAG = "GeofenceReceiver"*/
+private const val TAG = "GeofenceReceiver"

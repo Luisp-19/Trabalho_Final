@@ -17,4 +17,32 @@
     <string name="automatic_login_username" translatable="false">automatic_login_username</string>
     <string name="criacao_falhou">Utilizador não criado</string>
     <string name="criacao_sucesso">Criação com sucesso</string>
+
+    <!-- Error strings -->
+    <string name="geofence_not_available">Geofence service is not available now</string>
+    <string name="geofence_too_many_geofences">Your app has registered too many geofences</string>
+    <string name="geofence_too_many_pending_intents">
+        You have provided too many PendingIntents to the addGeofences() call
+    </string>
+    <string name="unknown_geofence_error">
+        Unknown error: the Geofence service is not available now
+    </string>
+    <string name="location_required_error">Location services must be enabled for this game.</string>
+
+    <string name="geofences_not_removed">Geofences not removed.</string>
+    <string name="geofences_not_added">Problem in adding geofences.</string>
+    <string name="insufficient_permissions">Insufficient permissions.</string>
+    <string name="geofence_error">There was an error in finding your treasure</string>
+
+    <!--    Geofence Status Strings-->
+    <string name="geofences_added">Clue Geofence added.</string>
+    <string name="geofences_removed">Geofences removed.</string>
+    <string name="geofence_entered">Geofence entered.</string>
+    <string name="geofence_over">You have found the treasure! Congratulations!</string>
+
+    <!-- Notification Strings-->
+    <string name="channel_name">GeofenceStatus</string>
+    <string name="notification_channel_description">Geofence status notification</string>
+
+
 </resources>
