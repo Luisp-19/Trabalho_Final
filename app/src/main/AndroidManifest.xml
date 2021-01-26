@@ -21,6 +21,7 @@
         <receiver
             android:name=".FenceReceiver"
             android:enabled="true"
+            android:allowBackup="true"
             android:exported="true"></receiver>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

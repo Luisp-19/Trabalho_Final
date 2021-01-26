@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.viana_xplore_reset.Webservices.Fenke
 import com.example.viana_xplore_reset.Webservices.Markador
 import com.example.viana_xplore_reset.Webservices.PostLogin
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -72,15 +73,36 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLo
 
         val request = Servicos.buildServico(PostLogin::class.java)
         val call = request.getMarcadores()              //pede a API os problemas da BD
-        var position: LatLng
+        var position_marcadores: LatLng
+        val call_fence = request.getFences()
+        var position_fences: LatLng
+        var radius: Float
+
+        call_fence.enqueue(object : Callback<List<Fenke>> {
+            override fun onResponse(call_fence: Call<List<Fenke>>, response: Response<List<Fenke>>) {
+                if (response.isSuccessful) {
+                    val c = response.body()!!
+                    for (FencesFor in c) {
+                        position_fences = LatLng(FencesFor.latitude.toDouble(), FencesFor.longitude.toDouble())
+                        radius = (FencesFor.raio.toFloat())
+                        val fence = mMap.addCircle(CircleOptions().center(position_fences).radius(radius.toDouble()).strokeColor(Color.GREEN).fillColor(Color.argb(64, 255, 255, 0)).strokeWidth(4f))
+                        fence.tag = FencesFor.id
+                    }
+                }
+            }
+
+            override fun onFailure(call_fence: Call<List<Fenke>>, t: Throwable) {
+                Toast.makeText(this@AtividadeMapa, "${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
 
         call.enqueue(object : Callback<List<Markador>> {
             override fun onResponse(call: Call<List<Markador>>, response: Response<List<Markador>>) {
                 if (response.isSuccessful) {
                     val c = response.body()!!
                     for (marcadorFor in c) {
-                        position = LatLng(marcadorFor.latitude.toDouble(), marcadorFor.longitude.toDouble())
-                        val marcador = mMap.addMarker(MarkerOptions().position(position).title("${marcadorFor.nome}"))
+                        position_marcadores = LatLng(marcadorFor.latitude.toDouble(), marcadorFor.longitude.toDouble())
+                        val marcador = mMap.addMarker(MarkerOptions().position(position_marcadores).title("${marcadorFor.nome}"))
                         marcador.tag = marcadorFor.id
                     }
                 }
@@ -121,7 +143,7 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLo
             })
 
             val viana = LatLng(41.7065, -8.8158)
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(viana, 16f))
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(viana, 12f))
 
             enableUserLocation()
 
@@ -148,7 +170,7 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLo
     }
 
     private fun handleMapLongClick(latLng: LatLng) {
-        mMap.clear()
+        //mMap.clear()
         addMarker(latLng)
         addCircle(latLng, GEOFENCE_RADIUS)
         //addGeofence(latLng, GEOFENCE_RADIUS)
