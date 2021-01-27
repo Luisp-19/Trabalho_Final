@@ -17,6 +17,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.SavedStateViewModelFactory
+import androidx.lifecycle.ViewModelProviders
 import com.example.viana_xplore_reset.Webservices.Fenke
 import com.example.viana_xplore_reset.Webservices.Markador
 import com.example.viana_xplore_reset.Webservices.PostLogin
@@ -47,9 +50,11 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
     lateinit var latitude: String
 
     //Geofence
-    private lateinit var GeofencingClient: GeofencingClient
+    private lateinit var geofencingClient: GeofencingClient
     private var FINE_LOCATION_ACCESS_REQUEST_CODE = 10001;
     private var  BACKGROUND_LOCATION_ACCESS_REQUEST_CODE = 10002;
+
+    private lateinit var viewModel: ViewModel
 
     private val geofencePendingIntent: PendingIntent by lazy {
         val intent = Intent(this, FenceReceiver::class.java)
@@ -68,10 +73,13 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
         foto = ""
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        GeofencingClient = LocationServices.getGeofencingClient(this)
+        geofencingClient = LocationServices.getGeofencingClient(this)
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_atividade_mapa)
+
+        viewModel = ViewModelProviders.of(this, SavedStateViewModelFactory(this.application,
+                this)).get(ViewModel::class.java)
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
@@ -101,22 +109,20 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
                                 .strokeWidth(4f))
                         fence.tag = FencesFor.id
 
-                        Geofence.Builder()
+                        /*Geofence.Builder()
                                 // Set the request ID, string to identify the geofence.
                                 .setRequestId(fence.id)
                                 // Set the circular region of this geofence.
                                 .setCircularRegion(FencesFor.latitude.toDouble(),
                                         FencesFor.longitude.toDouble(),
-                                        radius
-                                )
+                                        radius)
                                 // Set the expiration duration of the geofence. This geofence gets
                                 // automatically removed after this period of time.
                                 .setExpirationDuration(Fences.GeofencingConstants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
                                 // Set the transition types of interest. Alerts are only generated for these
                                 // transition. We track entry and exit transitions in this sample.
-                                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
-                                //.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
-                                .build()
+                                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+                                .build()*/
 
                         /*val geofencingRequest = GeofencingRequest.Builder()
                                 // The INITIAL_TRIGGER_ENTER flag indicates that geofencing service should trigger a
@@ -185,6 +191,7 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
         createChannel(this)
     }
 
+
         /**
          * Manipulates the map once available.
          * This callback is triggered when the map is ready to be used.
@@ -220,7 +227,8 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
 
         }
 
-    /*private fun BuilderGeofence() {
+    private fun addGeofenceForClue() {
+        if (viewModel.geofenceIsActive()) return
         val currentGeofenceIndex = viewModel.nextGeofenceIndex()
         if(currentGeofenceIndex >= Fences.GeofencingConstants.NUM_LANDMARKS) {
             return
@@ -243,7 +251,46 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
                 // transition. We track entry and exit transitions in this sample.
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
                 .build()
-    }*/
+
+        // Build the geofence request
+        val geofencingRequest = GeofencingRequest.Builder()
+                // The INITIAL_TRIGGER_ENTER flag indicates that geofencing service should trigger a
+                // GEOFENCE_TRANSITION_ENTER notification when the geofence is added and if the device
+                // is already inside that geofence.
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+
+                // Add the geofences to be monitored by geofencing service.
+                .addGeofence(geofence)
+                .build()
+
+        // First, remove any existing geofences that use our pending intent
+        geofencingClient.removeGeofences(geofencePendingIntent)?.run {
+            // Regardless of success/failure of the removal, add the new geofence
+            addOnCompleteListener {
+                // Add the new geofence request with the new geofence
+                geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
+                    addOnSuccessListener {
+                        // Geofences added.
+                        Toast.makeText(this@AtividadeMapa, R.string.geofences_added,
+                                Toast.LENGTH_SHORT)
+                                .show()
+                        Log.e("Add Geofence", geofence.requestId)
+                        // Tell the viewmodel that we've reached the end of the game and
+                        // activated the last "geofence" --- by removing the Geofence.
+                        viewModel.geofenceActivated()
+                    }
+                    addOnFailureListener {
+                        // Failed to add geofences.
+                        Toast.makeText(this@AtividadeMapa, R.string.geofences_not_added,
+                                Toast.LENGTH_SHORT).show()
+                        if ((it.message != null)) {
+                            Log.w(TAG, it.message!!)
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 
     private fun enableUserLocation() {
@@ -316,3 +363,4 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
     }
 
 }
+private const val TAG = "AtividadeMapa"

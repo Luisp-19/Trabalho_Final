@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Viana Xplore</string>
 
     <string name="preference_file_key" translatable="false">preference_file_key</string>
@@ -42,9 +42,12 @@
 
     <!-- Notification Strings-->
     <string name="channel_name">GeofenceStatus</string>
+    <string name="content_text">Entraste na Fence!! <xliff:g id="geofence_location">%1$s</xliff:g>.</string>
     <string name="notification_channel_description">Geofence status notification</string>
     <string name="Viana_location">Fence_Viana</string>
     <string name="Darque_location">Fence_Darque</string>
+
+    <string name="not_started_hint"></string>
 
 
 </resources>
