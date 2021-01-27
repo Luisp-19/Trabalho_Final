@@ -9,6 +9,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -19,9 +20,7 @@ import androidx.core.content.ContextCompat
 import com.example.viana_xplore_reset.Webservices.Fenke
 import com.example.viana_xplore_reset.Webservices.Markador
 import com.example.viana_xplore_reset.Webservices.PostLogin
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.GeofencingClient
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -91,6 +90,8 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
                 if (response.isSuccessful) {
                     val c = response.body()!!
                     for (FencesFor in c) {
+                        val intent_fence = Intent(this@AtividadeMapa, Fences::class.java)
+
                         position_fences = LatLng(FencesFor.latitude.toDouble(), FencesFor.longitude.toDouble())
                         radius = (FencesFor.raio.toFloat())
                         val fence = mMap.addCircle(CircleOptions().center(position_fences)
@@ -100,6 +101,61 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
                                 .strokeWidth(4f))
                         fence.tag = FencesFor.id
 
+                        Geofence.Builder()
+                                // Set the request ID, string to identify the geofence.
+                                .setRequestId(fence.id)
+                                // Set the circular region of this geofence.
+                                .setCircularRegion(FencesFor.latitude.toDouble(),
+                                        FencesFor.longitude.toDouble(),
+                                        radius
+                                )
+                                // Set the expiration duration of the geofence. This geofence gets
+                                // automatically removed after this period of time.
+                                .setExpirationDuration(Fences.GeofencingConstants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                                // Set the transition types of interest. Alerts are only generated for these
+                                // transition. We track entry and exit transitions in this sample.
+                                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+                                //.setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
+                                .build()
+
+                        /*val geofencingRequest = GeofencingRequest.Builder()
+                                // The INITIAL_TRIGGER_ENTER flag indicates that geofencing service should trigger a
+                                // GEOFENCE_TRANSITION_ENTER notification when the geofence is added and if the device
+                                // is already inside that geofence.
+                                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+
+                                // Add the geofences to be monitored by geofencing service.
+                                .addGeofence(geofence)
+                                .build()
+
+                        // First, remove any existing geofences that use our pending intent
+                        geofencingClient.removeGeofences(geofencePendingIntent)?.run {
+                            // Regardless of success/failure of the removal, add the new geofence
+                            addOnCompleteListener {
+                                // Add the new geofence request with the new geofence
+                                geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
+                                    addOnSuccessListener {
+                                        // Geofences added.
+                                        Toast.makeText(this@AtividadeMapa, R.string.geofences_added,
+                                                Toast.LENGTH_SHORT)
+                                                .show()
+                                        Log.e("Add Geofence", geofence.requestId)
+                                        // Tell the viewmodel that we've reached the end of the game and
+                                        // activated the last "geofence" --- by removing the Geofence.
+                                    }
+                                    addOnFailureListener {
+                                        // Failed to add geofences.
+                                        Toast.makeText(this@AtividadeMapa, R.string.geofences_not_added,
+                                                Toast.LENGTH_SHORT).show()
+                                        if ((it.message != null)) {
+                                            Log.w(TAG, it.message)
+                                        }
+                                    }
+                                }
+                            }
+                        }*/
+
+                        intent_fence.putExtra(Fences.EXTRA_POSITION, position_fences)
                     }
                 }
             }
@@ -163,6 +219,31 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
             enableUserLocation()
 
         }
+
+    /*private fun BuilderGeofence() {
+        val currentGeofenceIndex = viewModel.nextGeofenceIndex()
+        if(currentGeofenceIndex >= Fences.GeofencingConstants.NUM_LANDMARKS) {
+            return
+        }
+        val currentGeofenceData = Fences.GeofencingConstants.LANDMARK_DATA[currentGeofenceIndex]
+
+        // Build the Geofence Object
+        val geofence = Geofence.Builder()
+                // Set the request ID, string to identify the geofence.
+                .setRequestId(currentGeofenceData.id)
+                // Set the circular region of this geofence.
+                .setCircularRegion(currentGeofenceData.latLong.latitude,
+                        currentGeofenceData.latLong.longitude,
+                        Fences.GeofencingConstants.GEOFENCE_RADIUS_IN_METERS
+                )
+                // Set the expiration duration of the geofence. This geofence gets
+                // automatically removed after this period of time.
+                .setExpirationDuration(Fences.GeofencingConstants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                // Set the transition types of interest. Alerts are only generated for these
+                // transition. We track entry and exit transitions in this sample.
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+                .build()
+    }*/
 
 
     private fun enableUserLocation() {

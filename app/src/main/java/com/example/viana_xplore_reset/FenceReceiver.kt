@@ -36,6 +36,15 @@ class FenceReceiver : BroadcastReceiver() {
                 }
                 // Check geofence against the constants listed in GeofenceUtil.kt to see if the
                 // user has entered any of the locations we track for geofences.
+                val foundIndex = Fences.GeofencingConstants.LANDMARK_DATA.indexOfFirst {
+                    it.id == fenceId
+                }
+
+                // Unknown Geofences aren't helpful to us
+                if ( -1 == foundIndex ) {
+                    Log.e(TAG, "Unknown Geofence: Abort Mission")
+                    return
+                }
 
                 val notificationManager = ContextCompat.getSystemService(
                         context,
@@ -43,7 +52,7 @@ class FenceReceiver : BroadcastReceiver() {
                 ) as NotificationManager
 
                 notificationManager.sendGeofenceEnteredNotification(
-                        context
+                        context, foundIndex
                 )
             }
         }

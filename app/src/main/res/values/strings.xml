@@ -43,6 +43,8 @@
     <!-- Notification Strings-->
     <string name="channel_name">GeofenceStatus</string>
     <string name="notification_channel_description">Geofence status notification</string>
+    <string name="Viana_location">Fence_Viana</string>
+    <string name="Darque_location">Fence_Darque</string>
 
 
 </resources>

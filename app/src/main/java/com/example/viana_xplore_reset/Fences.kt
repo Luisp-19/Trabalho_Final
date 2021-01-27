@@ -35,24 +35,51 @@ fun errorMessage(context: Context, errorCode: Int): String {
     }
 }
 
-class Fences : AppCompatActivity() {
-    private lateinit var mMap: GoogleMap
+data class Fences (val id: String, val name: Int, val latLong: LatLng)  {
+
+    /*private lateinit var mMap: GoogleMap
     private val TAG = "Fences"
 
-
-    /*override fun onCreate() {
+    override fun onCreate() {
         val intent = intent
 
     }*/
 
-    fun getGeofencingRequest(geofence: Geofence?): GeofencingRequest? {
+    /*fun getGeofencingRequest(geofence: Geofence?): GeofencingRequest? {
         return GeofencingRequest.Builder()
                 .addGeofence(geofence) //Alterar para passar várias geofences
                 .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
                 .build()
+    }*/
+
+    internal object GeofencingConstants {
+
+        //val position = intent.getStrinExtra(Fences.EXTRA_POSITION)
+        /**
+         * Used to set an expiration time for a geofence. After this amount of time, Location services
+         * stops tracking the geofence. For this sample, geofences expire after one hour.
+         */
+        val GEOFENCE_EXPIRATION_IN_MILLISECONDS: Long = java.util.concurrent.TimeUnit.HOURS.toMillis(1)
+
+        val LANDMARK_DATA = arrayOf(
+                Fences(
+                        "Viana",
+                        R.string.Viana_location,
+                        LatLng(41.697398752697346, -8.836316563402274)),
+
+                Fences(
+                        "Darque",
+                        R.string.Darque_location,
+                        LatLng(41.68362630510686, -8.793922025402004)),
+
+        )
+
+        val NUM_LANDMARKS = LANDMARK_DATA.size
+        const val GEOFENCE_RADIUS_IN_METERS = 1600f
+        const val EXTRA_GEOFENCE_INDEX = "GEOFENCE_INDEX"
     }
 
-
     companion object {
+        const val EXTRA_POSITION = "com.example.android.wordlistsql.EXTRA_POSITION"
     }
 }

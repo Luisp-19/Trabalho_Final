@@ -39,7 +39,7 @@ fun createChannel(context: Context) {
  * entered notification.  It sends a custom notification based on the name string associated
  * with the LANDMARK_DATA from GeofencingConstatns in the GeofenceUtils file.
  */
-fun NotificationManager.sendGeofenceEnteredNotification(context: Context) {
+fun NotificationManager.sendGeofenceEnteredNotification(context: Context, foundIndex: Int) {
     val contentIntent = Intent(context, AtividadeMapa::class.java)
     val contentPendingIntent = PendingIntent.getActivity(
             context,
@@ -52,6 +52,8 @@ fun NotificationManager.sendGeofenceEnteredNotification(context: Context) {
     // a custom message when a Geofence triggers.
     val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle(context.getString(R.string.app_name))
+            /*.setContentText(context.getString(R.string.content_text,
+                    context.getString(Fences.GeofencingConstants.LANDMARK_DATA[foundIndex].name)))*/
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(contentPendingIntent)
 
