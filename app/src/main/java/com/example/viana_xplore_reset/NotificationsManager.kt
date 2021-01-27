@@ -55,6 +55,7 @@ fun NotificationManager.sendGeofenceEnteredNotification(context: Context, foundI
             .setContentTitle(context.getString(R.string.app_name))
             .setContentText(context.getString(R.string.content_text,
                     context.getString(Fences.GeofencingConstants.LANDMARK_DATA[foundIndex].name)))
+            .setSmallIcon(R.drawable.viana)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(contentPendingIntent)
 

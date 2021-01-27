@@ -2,13 +2,17 @@ package com.example.viana_xplore_reset
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.annotation.TargetApi
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.IntentSender
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
@@ -17,12 +21,14 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.ViewModelProviders
 import com.example.viana_xplore_reset.Webservices.Fenke
 import com.example.viana_xplore_reset.Webservices.Markador
 import com.example.viana_xplore_reset.Webservices.PostLogin
+import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -32,6 +38,7 @@ import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.snackbar.Snackbar
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -55,6 +62,10 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
     private var  BACKGROUND_LOCATION_ACCESS_REQUEST_CODE = 10002;
 
     private lateinit var viewModel: ViewModel
+    private lateinit var binding: AtividadeMapa
+
+    private val runningQOrLater =
+            android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q
 
     private val geofencePendingIntent: PendingIntent by lazy {
         val intent = Intent(this, FenceReceiver::class.java)
@@ -73,14 +84,17 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
         foto = ""
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        geofencingClient = LocationServices.getGeofencingClient(this)
+
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_atividade_mapa)
 
+        //binding = DataBindingUtil.setContentView(this, R.layout.activity_atividade_mapa)
         viewModel = ViewModelProviders.of(this, SavedStateViewModelFactory(this.application,
                 this)).get(ViewModel::class.java)
-
+        //binding.viewmodel = viewModel
+        //binding.lifecycleOwner = this
+        geofencingClient = LocationServices.getGeofencingClient(this)
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
                 .findFragmentById(R.id.map) as SupportMapFragment
@@ -93,6 +107,7 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
         var position_fences: LatLng
         var radius: Float
 
+        //Chamar as fences da base de dados e imprimir
         call_fence.enqueue(object : Callback<List<Fenke>> {
             override fun onResponse(call_fence: Call<List<Fenke>>, response: Response<List<Fenke>>) {
                 if (response.isSuccessful) {
@@ -171,6 +186,7 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
             }
         })
 
+
         call.enqueue(object : Callback<List<Markador>> {
             override fun onResponse(call: Call<List<Markador>>, response: Response<List<Markador>>) {
                 if (response.isSuccessful) {
@@ -191,6 +207,120 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
         createChannel(this)
     }
 
+    override fun onStart() {
+        super.onStart()
+        checkPermissionsAndStartGeofencing()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_TURN_DEVICE_LOCATION_ON) {
+            // We don't rely on the result code, but just check the location setting again
+            checkDeviceLocationSettingsAndStartGeofence(false)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        val extras = intent?.extras
+        if(extras != null){
+            if(extras.containsKey(Fences.GeofencingConstants.EXTRA_GEOFENCE_INDEX)){
+                checkPermissionsAndStartGeofencing()
+            }
+        }
+    }
+
+
+    private fun checkPermissionsAndStartGeofencing() {
+        if (viewModel.geofenceIsActive()) return
+        if (foregroundAndBackgroundLocationPermissionApproved()) {
+            checkDeviceLocationSettingsAndStartGeofence()
+        } else {
+            requestForegroundAndBackgroundLocationPermissions()
+        }
+    }
+
+    private fun checkDeviceLocationSettingsAndStartGeofence(resolve:Boolean = true) {
+        val locationRequest = LocationRequest.create().apply {
+            priority = LocationRequest.PRIORITY_LOW_POWER
+        }
+        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
+
+        val settingsClient = LocationServices.getSettingsClient(this)
+        val locationSettingsResponseTask =
+                settingsClient.checkLocationSettings(builder.build())
+
+        locationSettingsResponseTask.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException && resolve){
+                // Location settings are not satisfied, but this can be fixed
+                // by showing the user a dialog.
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    exception.startResolutionForResult(this@AtividadeMapa,
+                            REQUEST_TURN_DEVICE_LOCATION_ON)
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    Log.d(TAG, "Error geting location settings resolution: " + sendEx.message)
+                }
+            } /*else {
+                Snackbar.make(
+                       // binding.activityMapsMain,
+                        R.string.location_required_error, Snackbar.LENGTH_INDEFINITE
+                ).setAction(android.R.string.ok) {
+                    checkDeviceLocationSettingsAndStartGeofence()
+                }.show()
+            }*/
+        }
+        locationSettingsResponseTask.addOnCompleteListener {
+            if ( it.isSuccessful ) {
+                addGeofenceForClue()
+            }
+        }
+    }
+
+    @TargetApi(29)
+    private fun foregroundAndBackgroundLocationPermissionApproved(): Boolean {
+        val foregroundLocationApproved = (
+                PackageManager.PERMISSION_GRANTED ==
+                        ActivityCompat.checkSelfPermission(this,
+                                Manifest.permission.ACCESS_FINE_LOCATION))
+        val backgroundPermissionApproved =
+                if (runningQOrLater) {
+                    PackageManager.PERMISSION_GRANTED ==
+                            ActivityCompat.checkSelfPermission(
+                                    this, Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                            )
+                } else {
+                    true
+                }
+        return foregroundLocationApproved && backgroundPermissionApproved
+    }
+
+    @TargetApi(29 )
+    private fun requestForegroundAndBackgroundLocationPermissions() {
+        if (foregroundAndBackgroundLocationPermissionApproved())
+            return
+
+        // Else request the permission
+        // this provides the result[LOCATION_PERMISSION_INDEX]
+        var permissionsArray = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+
+        val resultCode = when {
+            runningQOrLater -> {
+                // this provides the result[BACKGROUND_LOCATION_PERMISSION_INDEX]
+                permissionsArray += Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE
+            }
+            else -> REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE
+        }
+
+        Log.d(TAG, "Request foreground only location permission")
+        ActivityCompat.requestPermissions(
+                this@AtividadeMapa,
+                permissionsArray,
+                resultCode
+        )
+    }
 
         /**
          * Manipulates the map once available.
@@ -363,4 +493,9 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
     }
 
 }
+private const val REQUEST_FOREGROUND_AND_BACKGROUND_PERMISSION_RESULT_CODE = 33
+private const val REQUEST_FOREGROUND_ONLY_PERMISSIONS_REQUEST_CODE = 34
+private const val REQUEST_TURN_DEVICE_LOCATION_ON = 29
+private const val LOCATION_PERMISSION_INDEX = 0
+private const val BACKGROUND_LOCATION_PERMISSION_INDEX = 1
 private const val TAG = "AtividadeMapa"

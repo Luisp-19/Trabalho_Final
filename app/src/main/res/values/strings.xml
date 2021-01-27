@@ -35,9 +35,9 @@
     <string name="geofence_error">There was an error in finding your treasure</string>
 
     <!--    Geofence Status Strings-->
-    <string name="geofences_added">Clue Geofence added.</string>
+    <string name="geofences_added">Estás perto</string>
     <string name="geofences_removed">Geofences removed.</string>
-    <string name="geofence_entered">Geofence entered.</string>
+    <string name="geofence_entered">Entraste na Fence</string>
     <string name="geofence_over">You have found the treasure! Congratulations!</string>
 
     <!-- Notification Strings-->
