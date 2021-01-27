@@ -16,16 +16,11 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.net.URL
 
-/*private lateinit var marcador_latitude: TextView
-private lateinit var marcador_longitude: TextView*/
-
-
 class Marcadores : AppCompatActivity() {
 
     lateinit var nome: TextView
     lateinit var descricao: TextView
     lateinit var foto: ImageView
-    //lateinit var coordenadas: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,8 +35,6 @@ class Marcadores : AppCompatActivity() {
         //Popula com os valores retirados dos companions
         val id = intent.getStringExtra(EXTRA_ID)
         var call_id= id?.toInt()
-        val latitude = intent.getStringExtra(EXTRA_LATITUDE)
-        val longitude = intent.getStringExtra(EXTRA_LONGITUDE)
         val request = Servicos.buildServico(PostLogin::class.java)
 
         //Define a call para receber os problemas da API
@@ -57,7 +50,6 @@ class Marcadores : AppCompatActivity() {
                         foto = findViewById(R.id.fotoView)
                         nome.text = marcadorFor.nome
                         descricao.text = marcadorFor.descricao
-                        //coordenadas.text = "${marcador.latitude}, ${marcador.longitude}"
 
                         Thread {
                             val url = URL("${marcadorFor.foto}")
@@ -82,10 +74,5 @@ class Marcadores : AppCompatActivity() {
         const val EXTRA_NOME = "com.example.android.wordlistsql.EXTRA_NOME"
         const val EXTRA_DESCRICAO = "com.example.android.wordlistsql.EXTRA_DESCRICACAO"
         const val EXTRA_FOTO = "com.example.android.wordlistsql.EXTRA_FOTO"
-
-
-        //const val EXTRA_EDITABLE = "estg.ipvc.pm_app.activity.notedetails.EXTRA_EDITABLE"
-        const val EXTRA_LATITUDE = "com.example.android.wordlistsql.LAT"
-        const val EXTRA_LONGITUDE = "com.example.android.wordlistsql.LON"
     }
 }

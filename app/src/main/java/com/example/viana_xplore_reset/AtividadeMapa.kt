@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -36,7 +35,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 
-class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
+class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var mMap: GoogleMap
 
@@ -52,7 +51,6 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLo
     private lateinit var GeofencingClient: GeofencingClient
     private var FINE_LOCATION_ACCESS_REQUEST_CODE = 10001;
     private var  BACKGROUND_LOCATION_ACCESS_REQUEST_CODE = 10002;
-    private val GEOFENCE_RADIUS = 200f
 
     private val geofencePendingIntent: PendingIntent by lazy {
         val intent = Intent(this, FenceReceiver::class.java)
@@ -95,8 +93,13 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLo
                     for (FencesFor in c) {
                         position_fences = LatLng(FencesFor.latitude.toDouble(), FencesFor.longitude.toDouble())
                         radius = (FencesFor.raio.toFloat())
-                        val fence = mMap.addCircle(CircleOptions().center(position_fences).radius(radius.toDouble()).strokeColor(Color.GREEN).fillColor(Color.argb(64, 255, 255, 0)).strokeWidth(4f))
+                        val fence = mMap.addCircle(CircleOptions().center(position_fences)
+                                .radius(radius.toDouble())
+                                .strokeColor(Color.GREEN)
+                                .fillColor(Color.argb(64, 255, 255, 0))
+                                .strokeWidth(4f))
                         fence.tag = FencesFor.id
+
                     }
                 }
             }
@@ -122,6 +125,8 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLo
                 Toast.makeText(this@AtividadeMapa, "${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
+
+        createChannel(this)
     }
 
         /**
@@ -157,50 +162,8 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLo
 
             enableUserLocation()
 
-            mMap.setOnMapLongClickListener(this)
-
         }
 
-    override fun onMapLongClick(latLng: LatLng) {
-        if (Build.VERSION.SDK_INT >= 29) {
-            //We need background permission
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                handleMapLongClick(latLng)
-            } else {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
-                    //We show a dialog and ask for permission
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), BACKGROUND_LOCATION_ACCESS_REQUEST_CODE)
-                } else {
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), BACKGROUND_LOCATION_ACCESS_REQUEST_CODE)
-                }
-            }
-        } else {
-            handleMapLongClick(latLng)
-        }
-    }
-
-    private fun handleMapLongClick(latLng: LatLng) {
-        //mMap.clear()
-        addMarker(latLng)
-        addCircle(latLng, GEOFENCE_RADIUS)
-        //addGeofence(latLng, GEOFENCE_RADIUS)
-    }
-
-    private fun addMarker(latLng: LatLng) {
-        val markerOptions = MarkerOptions().position(latLng)
-        mMap.addMarker(markerOptions)
-    }
-
-
-    private fun addCircle(latLng: LatLng, radius: Float) {
-        val circleOptions = CircleOptions()
-        circleOptions.center(latLng)
-        circleOptions.radius(1000.0)
-        circleOptions.strokeColor(Color.argb(255, 255, 0, 0))
-        circleOptions.fillColor(Color.argb(64, 255, 0, 0))
-        circleOptions.strokeWidth(4f)
-        mMap.addCircle(circleOptions)
-    }
 
     private fun enableUserLocation() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {

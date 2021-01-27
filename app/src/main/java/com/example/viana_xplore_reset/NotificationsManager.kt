@@ -9,6 +9,9 @@ import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
 
+private const val NOTIFICATION_ID = 33
+private const val CHANNEL_ID = "GeofenceChannel"
+
 fun createChannel(context: Context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val notificationChannel = NotificationChannel(
@@ -45,7 +48,6 @@ fun NotificationManager.sendGeofenceEnteredNotification(context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT
     )
 
-
     // We use the name resource ID from the LANDMARK_DATA along with content_text to create
     // a custom message when a Geofence triggers.
     val builder = NotificationCompat.Builder(context, CHANNEL_ID)
@@ -55,9 +57,6 @@ fun NotificationManager.sendGeofenceEnteredNotification(context: Context) {
 
     notify(NOTIFICATION_ID, builder.build())
 }
-
-private const val NOTIFICATION_ID = 33
-private const val CHANNEL_ID = "GeofenceChannel"
 
 class NotificationsManager {
 
