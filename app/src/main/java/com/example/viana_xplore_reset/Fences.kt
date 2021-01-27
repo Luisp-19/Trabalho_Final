@@ -37,24 +37,8 @@ fun errorMessage(context: Context, errorCode: Int): String {
 
 data class Fences (val id: String, val name: Int, val latLong: LatLng)  {
 
-    /*private lateinit var mMap: GoogleMap
-    private val TAG = "Fences"
-
-    override fun onCreate() {
-        val intent = intent
-
-    }*/
-
-    /*fun getGeofencingRequest(geofence: Geofence?): GeofencingRequest? {
-        return GeofencingRequest.Builder()
-                .addGeofence(geofence) //Alterar para passar várias geofences
-                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-                .build()
-    }*/
-
     internal object GeofencingConstants {
 
-        //val position = intent.getStrinExtra(Fences.EXTRA_POSITION)
         /**
          * Used to set an expiration time for a geofence. After this amount of time, Location services
          * stops tracking the geofence. For this sample, geofences expire after one hour.

@@ -64,14 +64,15 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var viewModel: ViewModel
     private lateinit var binding: AtividadeMapa
 
+    //Verificar a versão do SO
     private val runningQOrLater =
             android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q
 
+    //Inicializar o BroadcatReceiver
     private val geofencePendingIntent: PendingIntent by lazy {
         val intent = Intent(this, FenceReceiver::class.java)
         intent.action = ACTION_GEOFENCE_EVENT
         // Use FLAG_UPDATE_CURRENT so that you get the same pending intent back when calling
-        // addGeofences() and removeGeofences().
         PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
@@ -85,16 +86,14 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
 
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_atividade_mapa)
 
-        //binding = DataBindingUtil.setContentView(this, R.layout.activity_atividade_mapa)
+        //Para ir buscar os metodos à classe
         viewModel = ViewModelProviders.of(this, SavedStateViewModelFactory(this.application,
                 this)).get(ViewModel::class.java)
-        //binding.viewmodel = viewModel
-        //binding.lifecycleOwner = this
-        geofencingClient = LocationServices.getGeofencingClient(this)
+        geofencingClient = LocationServices.getGeofencingClient(this)       //Para interagir com as APIs de Geofence
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
                 .findFragmentById(R.id.map) as SupportMapFragment
@@ -123,58 +122,6 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
                                 .fillColor(Color.argb(64, 255, 255, 0))
                                 .strokeWidth(4f))
                         fence.tag = FencesFor.id
-
-                        /*Geofence.Builder()
-                                // Set the request ID, string to identify the geofence.
-                                .setRequestId(fence.id)
-                                // Set the circular region of this geofence.
-                                .setCircularRegion(FencesFor.latitude.toDouble(),
-                                        FencesFor.longitude.toDouble(),
-                                        radius)
-                                // Set the expiration duration of the geofence. This geofence gets
-                                // automatically removed after this period of time.
-                                .setExpirationDuration(Fences.GeofencingConstants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
-                                // Set the transition types of interest. Alerts are only generated for these
-                                // transition. We track entry and exit transitions in this sample.
-                                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
-                                .build()*/
-
-                        /*val geofencingRequest = GeofencingRequest.Builder()
-                                // The INITIAL_TRIGGER_ENTER flag indicates that geofencing service should trigger a
-                                // GEOFENCE_TRANSITION_ENTER notification when the geofence is added and if the device
-                                // is already inside that geofence.
-                                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-
-                                // Add the geofences to be monitored by geofencing service.
-                                .addGeofence(geofence)
-                                .build()
-
-                        // First, remove any existing geofences that use our pending intent
-                        geofencingClient.removeGeofences(geofencePendingIntent)?.run {
-                            // Regardless of success/failure of the removal, add the new geofence
-                            addOnCompleteListener {
-                                // Add the new geofence request with the new geofence
-                                geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
-                                    addOnSuccessListener {
-                                        // Geofences added.
-                                        Toast.makeText(this@AtividadeMapa, R.string.geofences_added,
-                                                Toast.LENGTH_SHORT)
-                                                .show()
-                                        Log.e("Add Geofence", geofence.requestId)
-                                        // Tell the viewmodel that we've reached the end of the game and
-                                        // activated the last "geofence" --- by removing the Geofence.
-                                    }
-                                    addOnFailureListener {
-                                        // Failed to add geofences.
-                                        Toast.makeText(this@AtividadeMapa, R.string.geofences_not_added,
-                                                Toast.LENGTH_SHORT).show()
-                                        if ((it.message != null)) {
-                                            Log.w(TAG, it.message)
-                                        }
-                                    }
-                                }
-                            }
-                        }*/
 
                         intent_fence.putExtra(Fences.EXTRA_POSITION, position_fences)
                     }
@@ -436,28 +383,7 @@ class AtividadeMapa : AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
-
-    @SuppressLint("MissingPermission")
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (requestCode == FINE_LOCATION_ACCESS_REQUEST_CODE) {
-            if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                //We have the permission
-                mMap.isMyLocationEnabled = true
-            } else {
-                //We do not have the permission..
-            }
-        }
-        if (requestCode == BACKGROUND_LOCATION_ACCESS_REQUEST_CODE) {
-            if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                //We have the permission
-                Toast.makeText(this, "You can add geofences...", Toast.LENGTH_SHORT).show()
-            } else {
-                //We do not have the permission..
-                Toast.makeText(this, "Background location access is neccessary for geofences to trigger...", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
+    
     //Cria/Chama o menu no mapa
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater: MenuInflater = menuInflater

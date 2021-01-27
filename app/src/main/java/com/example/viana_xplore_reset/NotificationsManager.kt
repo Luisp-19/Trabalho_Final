@@ -29,6 +29,7 @@ fun createChannel(context: Context) {
         notificationChannel.enableVibration(true)
         notificationChannel.description = context.getString(R.string.notification_channel_description)
 
+        //Builder do canal das notificações
         val notificationManager = context.getSystemService(NotificationManager::class.java)
         notificationManager.createNotificationChannel(notificationChannel)
     }
@@ -39,6 +40,8 @@ fun createChannel(context: Context) {
  * entered notification.  It sends a custom notification based on the name string associated
  * with the LANDMARK_DATA from GeofencingConstatns in the GeofenceUtils file.
  */
+
+//Definição do que vai ser enviado na notificação
 fun NotificationManager.sendGeofenceEnteredNotification(context: Context, foundIndex: Int) {
     val contentIntent = Intent(context, AtividadeMapa::class.java)
     contentIntent.putExtra(Fences.GeofencingConstants.EXTRA_GEOFENCE_INDEX, foundIndex)
@@ -46,7 +49,7 @@ fun NotificationManager.sendGeofenceEnteredNotification(context: Context, foundI
             context,
             NOTIFICATION_ID,
             contentIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_UPDATE_CURRENT   //Valida a intent e atualiza com nova informação
     )
 
     // We use the name resource ID from the LANDMARK_DATA along with content_text to create
@@ -59,6 +62,7 @@ fun NotificationManager.sendGeofenceEnteredNotification(context: Context, foundI
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(contentPendingIntent)
 
+    //Builder
     notify(NOTIFICATION_ID, builder.build())
 }
 

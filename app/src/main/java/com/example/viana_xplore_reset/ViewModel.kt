@@ -11,15 +11,6 @@ class ViewModel(state: SavedStateHandle) : ViewModel() {
     val geofenceIndex: LiveData<Int>
         get() = _geofenceIndex
 
-    /*val geofenceHintResourceId = Transformations.map(geofenceIndex) {
-        val index = geofenceIndex?.value ?: -1
-        when {
-            index < 0 -> R.string.not_started_hint
-            index < Fences.GeofencingConstants.NUM_LANDMARKS -> Fences.GeofencingConstants.LANDMARK_DATA[geofenceIndex.value!!]
-            else -> R.string.geofence_over
-        }
-    }*/
-
     fun geofenceActivated() {
         _geofenceIndex.value = _hintIndex.value
     }

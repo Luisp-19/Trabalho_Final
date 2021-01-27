@@ -34,6 +34,8 @@ class FenceReceiver : BroadcastReceiver() {
                         return
                     }
                 }
+
+                //Valida se o utilizador entrou nas fences
                 // Check geofence against the constants listed in GeofenceUtil.kt to see if the
                 // user has entered any of the locations we track for geofences.
                 val foundIndex = Fences.GeofencingConstants.LANDMARK_DATA.indexOfFirst {
@@ -46,6 +48,7 @@ class FenceReceiver : BroadcastReceiver() {
                     return
                 }
 
+                //Inicializa o gestor das notificações
                 val notificationManager = ContextCompat.getSystemService(
                         context,
                         NotificationManager::class.java
