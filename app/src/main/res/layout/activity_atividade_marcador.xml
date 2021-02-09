@@ -11,28 +11,27 @@
 
     <TextView
         android:id="@+id/nomeView"
-        android:layout_width="344dp"
-        android:layout_height="72dp"
+        android:layout_width="327dp"
+        android:layout_height="43dp"
         android:fontFamily="sans-serif-light"
         android:gravity="center_horizontal"
         android:hint="Nome"
-        android:inputType="textMultiLine"
+        android:inputType="textAutoComplete"
         android:textSize="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.492"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.024" />
+        app:layout_constraintVertical_bias="0.053" />
 
     <TextView
         android:id="@+id/descricaoView"
-        android:layout_width="283dp"
-        android:layout_height="290dp"
+        android:layout_width="233dp"
+        android:layout_height="250dp"
         android:layout_marginTop="40dp"
         android:fontFamily="sans-serif-light"
         android:gravity="center_horizontal"
-        android:hint="Descricao"
+        android:hint="Descrição"
         android:inputType="textMultiLine"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -41,9 +40,9 @@
 
     <ImageView
         android:id="@+id/fotoView"
-        android:layout_width="249dp"
-        android:layout_height="239dp"
-        android:layout_marginTop="40dp"
+        android:layout_width="227dp"
+        android:layout_height="219dp"
+        android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/nomeView"
